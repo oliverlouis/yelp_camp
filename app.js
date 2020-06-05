@@ -28,8 +28,8 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 passport.use(new LocalStrategy(User.authenticate()));
-passport.serializeUser(User.serializeUser);
-passport.deserializeUser(User.deserializeUser);
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
 
 app.use(bodyParser.urlencoded({extended: true}));
 app.set('view engine', 'ejs');
@@ -139,15 +139,15 @@ app.get('/register', (req, res) => {
 
 //handle sign up logic
 app.post('/register', (req, res) => {
-	const newUser = new User({username: req.body.username});
-	User.register(newUser, req.body.password, (err, user) => {
+	User.register(new User({username: req.body.username}), req.body.password, (err, user) => {
 		if (err) {
 			console.log(err);
 			return res.render('register');
+		} else {
+			passport.authenticate('local')(req, res, () => {
+				res.redirect('/campgrounds');
+			});
 		}
-		passport.authenticate('local')(req, res, () => {
-			res.redirect('/campgrounds');
-		});
 	});
 });
 
