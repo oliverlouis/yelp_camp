@@ -2,6 +2,14 @@ const express = require('express');
 const router = express.Router({mergeParams: true});
 const Campground = require('../models/campground');
 
+//FUNCTIONCALLS AND DECLARATIONS
+const isLoggedIn = (req, res, next) => {
+	if (req.isAuthenticated()) {
+		return next();
+	}
+	res.redirect('/login');
+};
+
 // INDEX ROUTE - DISPLAY ALL CAMPGROUNDS
 router.get('/campgrounds', (req, res) => {
 	//
@@ -16,17 +24,22 @@ router.get('/campgrounds', (req, res) => {
 	});
 });
 
-router.post('/campgrounds', (req, res) => {
+router.post('/campgrounds', isLoggedIn, (req, res) => {
 	//get data from form and add to campgrounds array
 	const name = req.body.name;
 	const image = req.body.image;
 	const description = req.body.description;
-	let newCampground = {name: name, image: image, description: description};
+	let author = {
+		id: req.user._id,
+		username: req.user.username,
+	};
+	let newCampground = {name: name, image: image, description: description, author: author};
 	//Create new campground and add it to database
 	Campground.create(newCampground, (err, campground) => {
 		if (err) {
 			console.log(err);
 		} else {
+			console.log(campground);
 			//redirect back to campgrounds page
 			res.redirect('/campgrounds');
 		}
@@ -34,7 +47,7 @@ router.post('/campgrounds', (req, res) => {
 });
 
 //NEW ROUTE - DISPLAY FORM
-router.get('/campgrounds/new', (req, res) => {
+router.get('/campgrounds/new', isLoggedIn, (req, res) => {
 	res.render('campgrounds/new');
 });
 

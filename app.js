@@ -26,7 +26,7 @@ const isLoggedIn = (req, res, next) => {
 	res.redirect('/login');
 };
 //Seed database with starter data
-seedDB();
+// seedDB();
 
 //PASSPORT CONFIG
 app.use(
