@@ -5,6 +5,7 @@ const express = require('express'),
 	Campground = require('./models/campground'),
 	Comment = require('./models/comment'),
 	seedDB = require('./seeds'),
+	methodOverride = require('method-override'),
 	passport = require('passport'),
 	LocalStrategy = require('passport-local'),
 	User = require('./models/user');
@@ -51,6 +52,7 @@ app.use((req, res, next) => {
 app.use(bodyParser.urlencoded({extended: true}));
 app.set('view engine', 'ejs');
 app.use(express.static(__dirname + '/public'));
+app.use(methodOverride('_method'));
 
 //Requiring Routes
 app.use(campgroundRoutes);

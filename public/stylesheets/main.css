@@ -9,3 +9,11 @@
 .thumbnail .caption-full {
    padding: 9px;
 }
+
+#delete__form {
+   display: inline;
+}
+
+.delete__form {
+   display: inline;
+}

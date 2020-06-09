@@ -2,12 +2,30 @@ const express = require('express');
 const router = express.Router({mergeParams: true});
 const Campground = require('../models/campground');
 
-//FUNCTIONCALLS AND DECLARATIONS
+//FUNCTIONCALLS AND DECLARATIONS - Middleware
 const isLoggedIn = (req, res, next) => {
 	if (req.isAuthenticated()) {
 		return next();
 	}
 	res.redirect('/login');
+};
+
+const checkCampgroundOwnership = (req, res, next) => {
+	if (req.isAuthenticated()) {
+		Campground.findById(req.params.id, (err, foundCampground) => {
+			if (err) {
+				res.redirect('/campgrounds');
+			} else {
+				if (foundCampground.author.id.equals(req.user._id)) {
+					next();
+				} else {
+					res.redirect('back');
+				}
+			}
+		});
+	} else {
+		res.redirect('back');
+	}
 };
 
 // INDEX ROUTE - DISPLAY ALL CAMPGROUNDS
@@ -39,7 +57,6 @@ router.post('/campgrounds', isLoggedIn, (req, res) => {
 		if (err) {
 			console.log(err);
 		} else {
-			console.log(campground);
 			//redirect back to campgrounds page
 			res.redirect('/campgrounds');
 		}
@@ -64,6 +81,39 @@ router.get('/campgrounds/:id', (req, res) => {
 				res.render('campgrounds/show', {campground: foundCampground});
 			}
 		});
+});
+
+//EDIT CAMPGROUND ROUTE
+router.get('/campgrounds/:id/edit', checkCampgroundOwnership, (req, res) => {
+	Campground.findById(req.params.id, (err, foundCampground) => {
+		if (err) {
+			res.redirect('/campgrounds');
+		} else {
+			res.render('campgrounds/edit', {campground: foundCampground});
+		}
+	});
+});
+
+//UPDATE CAMPGROUND ROUTE
+router.put('/campgrounds/:id', checkCampgroundOwnership, (req, res) => {
+	Campground.findByIdAndUpdate(req.params.id, req.body.campground, (err, updatedCampground) => {
+		if (err) {
+			res.redirect('/campgrounds');
+		} else {
+			res.redirect('/campgrounds/' + req.params.id);
+		}
+	});
+});
+
+//DELETE CAMPGROUND ROUTE
+router.delete('/campgrounds/:id', checkCampgroundOwnership, (req, res) => {
+	Campground.findByIdAndRemove(req.params.id, (err) => {
+		if (err) {
+			res.redirect('/campgrounds');
+		} else {
+			res.redirect('/campgrounds');
+		}
+	});
 });
 
 module.exports = router;
