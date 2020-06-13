@@ -5,6 +5,7 @@ const express = require('express'),
 	Campground = require('./models/campground'),
 	Comment = require('./models/comment'),
 	seedDB = require('./seeds'),
+	flash = require('connect-flash'),
 	methodOverride = require('method-override'),
 	passport = require('passport'),
 	LocalStrategy = require('passport-local'),
@@ -28,6 +29,7 @@ const isLoggedIn = (req, res, next) => {
 };
 //Seed database with starter data
 // seedDB();
+app.use(flash());
 
 //PASSPORT CONFIG
 app.use(
@@ -46,6 +48,8 @@ passport.deserializeUser(User.deserializeUser());
 
 app.use((req, res, next) => {
 	res.locals.currentUser = req.user;
+	res.locals.error = req.flash('error');
+	res.locals.success = req.flash('success');
 	next();
 });
 
